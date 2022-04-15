@@ -1,16 +1,10 @@
 const request = require("request");
-//It will contain most of the logic for fetching the data from each API endpoint
-/**
- * Makes an API request to receive the users IP address.
- * This request has
- * Makes a single API request to retrieve the user's IP address.
- * Input:
- *   - A callback (to pass back an error or the IP string)
- * Returns (via Callback):
- *   - An error, if any (nullable)
- *   - The IP address as a string (null if error). Example: "162.245.144.188"
+
+/*
  Function makes a single API request to retrieve the user's IP address
- This request is a function.
+ This request is a function with 2 parameters. The API request and a call back function.
+ This callback function has 3 arguments. an error a response and a body.
+ We can callback on all of these arguments. 
  */
 const fetchMyIP = function(callback) {
   request("https://api.ipify.org?format=json", (error, response, body) => {
@@ -30,10 +24,18 @@ const fetchMyIP = function(callback) {
   });
 };
 
+/*
+ Function uses the IP address to make an API request to retrieve the user's latitude and 
+ logitude coordinates.
+ This request is a function with 2 parameters. The API request and a call back function.
+ This callback function has 3 arguments. an error a response and a body.
+ We can callback on all of these arguments. 
+ */
+
 const fetchCoordsByIP = function(ip, callback) {
   let url = `https://api.freegeoip.app/json/${ip}?apikey=102737b0-bc71-11ec-824c-9b14f21a47e7`;
   request(url, (error, response, body) => {
-    //pass through the error to the callback if an error occurs when requesting the IP data
+    //pass through the error to the callback if an error occurs when requesting the coordinate data
     if (error) {
       callback(error, null);
       return;
@@ -47,7 +49,8 @@ const fetchCoordsByIP = function(ip, callback) {
       return;
     }
 
-    //parse and extract the IP address using JSON and then pass that through to the callback
+    //parse(turn into string) and extract the coordinates from the body of the data using JSON and 
+    //then pass that through to the callback as an object
     //(as the second argument) if there is no error
     const latitude = JSON.parse(body).latitude;
     const longitude = JSON.parse(body).longitude;
@@ -57,22 +60,34 @@ const fetchCoordsByIP = function(ip, callback) {
   });
 };
 
+/*
+ Function uses the coordinates to make an API request to retrieve the risetime and duration 
+ of the sttelite at the user's  latitude and logitude coordinates.
+ This request is a function with 2 parameters. The API request and a call back function.
+ This callback function has 3 arguments. an error a response and a body.
+ We can callback on all of these arguments. 
+ */
+
 const fetchISSFlyOverTimes = function({latitude, longitude}, callback) { 
   
   const url = `https://iss-pass.herokuapp.com/json/?lat=${latitude}&lon=${longitude}`;
   request(url, (error, response, body) => {
+    //pass through the error to the callback if an error occurs when requesting the rise time and duration
     if (error) {
       callback(error, null);
       return;
     }
+    // error can be set if invalid domain, user is offline, etc.
     if (response.statusCode !== 200) {
-      const message = (`Status Code ${response.statusCode} when fetching fly over passes ${body}`);
+      const message = `Status Code ${response.statusCode} when fetching fly over passes ${body}`;
       callback(Error(message), null);
       return;
     }
-   
+    //parse(turn into string) and extract the risetime and duration passes response from the body of the data 
+    //using JSON and then pass that through to the callback as an object
+    //(as the second argument) if there is no error
     const passes = JSON.parse(body).response;
-    
+
     callback(null, { passes });
   });
 };

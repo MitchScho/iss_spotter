@@ -1,7 +1,4 @@
-//It will require and run our main fetch function.
-// const { fetchCoordsByIP } = require("./iss");
-// const { fetchMyIP } = require("./iss");
-// const { fetchISSFlyOverTimes } = require("./iss");
+
 const { nextISSTimesForMyLocation } = require("./iss");
 
 const printPassTimes = function (passTimes) {
